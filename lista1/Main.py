@@ -15,8 +15,9 @@ from Utils import OutputLogger
 PROCESSES_FILENAME = "procs_data.txt"
 PROCESS_COUNT = 5000
 PROCESS_SWITCH_DELAY = 1
-RR_QUANTUM_TIME = 21
-MAX_PROCESS_LENGTH = 25
+RR_QUANTUM_TIME = 30
+MIN_PROCESS_LENGTH = 5
+MAX_PROCESS_LENGTH = 21
 STARVATION_THRESHOLD = 80000
 
 # zagłodzenie - starvation
@@ -34,7 +35,7 @@ class Main:
             #             round(gauss_distribution(100, 50, 5, 25))))
             self.que.append(
                 Process(x, random.randint(0, 1000),
-                        random.randint(5, MAX_PROCESS_LENGTH)))
+                        random.randint(MIN_PROCESS_LENGTH, MAX_PROCESS_LENGTH)))
         self.que.sort(key=lambda proc: proc.arrive_time)
 
     def save_processes_to_file(self):
