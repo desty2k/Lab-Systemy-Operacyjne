@@ -205,7 +205,8 @@ if __name__ == '__main__':
     logger = logging.getLogger()
     logger.info("Increase starvation threshold to show longest waiting processes.")
     logger.info("Increase quant of time to make RR work as FCFS.")
-    logger.info("RR runs fastest when quant of time is greater than 80% of process length.")
+    logger.warning("Disable switch time to compare SJF with others!")
+    logger.info("RR runs fastest when quant of time is close to 80% of maximum process length.")
 
     main = Main()
     # main.create_processes(PROCESS_COUNT)
