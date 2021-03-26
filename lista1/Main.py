@@ -80,7 +80,8 @@ class Main:
         longest_waiting = max(completed, key=operator.attrgetter("time_waiting"))
         logger.info("================= FCFS =================")
         logger.info("Total starved processes: {}".format(len(starved_processes)))
-        logger.info("Average waiting time: {}".format(sum(proc.time_waiting for proc in completed) / len(completed)))
+        logger.info("Average waiting time: {}".format(round(sum(proc.time_waiting for proc in completed) /
+                                                            len(completed), 2)))
         logger.info("Longest waiting time: {}, Duration: {}, Arrived: {}".format(longest_waiting.time_waiting,
                                                                                  longest_waiting.duration,
                                                                                  longest_waiting.arrive_time))
