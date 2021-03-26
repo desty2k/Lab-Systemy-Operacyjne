@@ -73,9 +73,6 @@ class Main:
                     else:
                         other.set_wait_time(other.time_waiting + process.duration)
 
-                if process.time_left != 0:
-                    queue.append(process)
-
                 time = time + process.duration
             if len(incomming) == 0 and len(queue) == 0:
                 break
