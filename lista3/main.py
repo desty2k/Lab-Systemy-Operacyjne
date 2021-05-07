@@ -16,15 +16,16 @@ import operator
 import traceback
 import collections
 
-from utils import Logger, qt_message_handler
 from request import Request
+from utils import Logger, qt_message_handler
 
 REQUESTS_COUNT = 2000
-PHYSICAL_MEMORY = 5
+PHYSICAL_MEMORY = 4
 VIRTUAL_MEMORY = 20
-LOCAL_REQUESTS_MAX_LENGTH = 10
+LOCAL_REQUESTS_MIN_LENGTH = 8
+LOCAL_REQUESTS_MAX_LENGTH = 15
 LOCAL_REQUESTS_MAX_DELTA = 1
-LOCAL_REQUESTS_CHANCE = 5  # range 1-10 | *10% chance of generating local requests sequence
+LOCAL_REQUESTS_CHANCE = 10  # range 1-10 | *10% chance of generating local requests sequence
 
 LOGGING_LEVEL = logging.INFO
 PICKLED_FILENAME = "requests.pick"
@@ -42,7 +43,7 @@ class Main(QObject):
         while arrive_time != REQUESTS_COUNT + 1:
             if random.randint(0, 10) < LOCAL_REQUESTS_CHANCE:
                 # generate sequence of local request
-                local_length = random.randint(1, LOCAL_REQUESTS_MAX_LENGTH)
+                local_length = random.randint(LOCAL_REQUESTS_MIN_LENGTH, LOCAL_REQUESTS_MAX_LENGTH)
                 local_mid_page = random.randint(1, VIRTUAL_MEMORY + 1)
                 for i in range(local_length):
                     if arrive_time >= REQUESTS_COUNT + 1:
@@ -61,12 +62,12 @@ class Main(QObject):
                 self.que.append(Request(random.randint(1, VIRTUAL_MEMORY + 1), arrive_time))
                 arrive_time = arrive_time + 1
 
-    def save_processes_to_file(self) -> None:
+    def save_requests_to_file(self) -> None:
         """Saves requests to file using pickle."""
         with open(PICKLED_FILENAME, "wb") as file:
             pickle.dump(self.que, file)
 
-    def load_processes_from_file(self) -> None:
+    def load_requests_from_file(self) -> None:
         """Load requests from files using pickle."""
         with open(PICKLED_FILENAME, "rb") as file:
             self.que = pickle.load(file)
@@ -113,11 +114,13 @@ class Main(QObject):
                     frames[frames.index(None)] = request
                     continue
 
+                # search for first occurence of every page in frames
                 used_frames = {req.get_page(): 0 for req in frames if req is not None}
                 for awaiting in incomming:
                     awaiting_page = awaiting.get_page()
                     if awaiting_page in used_frames and used_frames.get(awaiting_page) == 0:
                         used_frames[awaiting_page] = awaiting.get_arrive_time()
+                # get the page that will appear the latest
                 max_page = max(used_frames, key=used_frames.get)
                 for index, frame in enumerate(frames):
                     if frame is not None and frame.get_page() == max_page:
@@ -227,8 +230,10 @@ if __name__ == '__main__':
     sys.excepthook = exception_hook
 
     m = Main()
-    m.create_requests()
-    m.print_requests()
+    m.load_requests_from_file()
+    # m.create_requests()
+    # m.save_requests_to_file()
+    # m.print_requests()
     m.run_FIFO()
     m.run_OPT()
     m.run_LRU()
